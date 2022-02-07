@@ -2,9 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace FinancialPlanSankey
 {
@@ -60,6 +62,7 @@ namespace FinancialPlanSankey
                 if (result.Tables.Count > 0)
                 {
                     Console.Clear();
+                    var sb = new StringBuilder();
                     foreach (DataTable table in result.Tables)
                     {
                         if (table.Columns.Count > 0 && table.Rows.Count > 0)
@@ -80,17 +83,17 @@ namespace FinancialPlanSankey
                                     if (groupedExpense.GroupTotal < 0)
                                     {
                                         var groupColour = GetColourFromNumber(groupIndex).BackgroundColour;
-                                        Console.WriteLine($":{groupedExpense.GroupedCategory} {groupColour}");
-                                        Console.WriteLine($"Net [{-1 * groupedExpense.GroupTotal * 12:#.00}] {groupedExpense.GroupedCategory} {groupColour}");
+                                        sb.AppendLine($":{groupedExpense.GroupedCategory} {groupColour}");
+                                        sb.AppendLine($"Net [{-1 * groupedExpense.GroupTotal * 12:#.00}] {groupedExpense.GroupedCategory} {groupColour}");
                                         foreach (var subCategory in groupedExpense.SubExpenses)
                                         {
                                             if (subCategory.TwelveMonths < 0)
                                             {
                                                 if (subCategory.Category != groupedExpense.GroupedCategory)
                                                 {
-                                                    Console.WriteLine($":{subCategory.Category} {groupColour}");
+                                                    sb.AppendLine($":{subCategory.Category} {groupColour}");
                                                 }
-                                                Console.WriteLine($"{groupedExpense.GroupedCategory} [{-1 * subCategory.TwelveMonths * 12:#.00}] {(subCategory.Category == groupedExpense.GroupedCategory ? $"{groupedExpense.GroupedCategory}: Unassigned" : subCategory.Category)} {groupColour}");
+                                                sb.AppendLine($"{groupedExpense.GroupedCategory} [{-1 * subCategory.TwelveMonths * 12:#.00}] {(subCategory.Category == groupedExpense.GroupedCategory ? $"{groupedExpense.GroupedCategory}: Unassigned" : subCategory.Category)} {groupColour}");
                                             }
                                         }
                                         groupIndex++;
@@ -100,10 +103,12 @@ namespace FinancialPlanSankey
                             case "Transactions":
                                 var transactionsList = table.ToList<Transactions>();
                                 var lockdownStart = new DateTime(2020, 3, 23);
+                                lockdownStart = new DateTime(2021, 1, 1); // set to 2021
+                                var lockdownEnd = new DateTime(2021, 12, 31);
                                 var lockdownTransactions = transactionsList
-                                    .Where(t => t.Date >= lockdownStart)
-                                    // .Where(t => (t.Category == "Transfer" && !t.Subcategory.Contains("Credit Card")))
-                                    .Where(t => t.Category != "Transfer" || (t.Category == "Transfer" && !t.Subcategory.Contains("Credit Card")))
+                                    .Where(t => t.Date >= lockdownStart && t.Date <= lockdownEnd)
+                                     // .Where(t => (t.Category == "Transfer" && !t.Subcategory.Contains("Credit Card")))                                    
+                                    .Where(t => t.Category != "Transfer") //|| (t.Category == "Transfer" && !t.Subcategory.Contains("Credit Card")))
                                     .GroupBy(t => t.Category)
                                     .Select(g => new GroupedTransactions
                                     {
@@ -114,42 +119,42 @@ namespace FinancialPlanSankey
                                 foreach (var group in lockdownTransactions)
                                 {
                                     var groupColour = GetColourFromNumber(transactionIndex).BackgroundColour;
-                                    Console.WriteLine($":{group.Category} {groupColour}");
+                                    sb.AppendLine($":{group.Category} {groupColour}");
                                     if (group.GroupTotal > 0)
                                     {
-                                        Console.WriteLine($"{group.Category} [{group.GroupTotal:#.00}] Net {groupColour}");
+                                        sb.AppendLine($"{group.Category} [{group.GroupTotal:#.00}] Net {groupColour}");
                                         foreach (var sub in group.Sub)
                                         {
                                             if (sub.Category != group.Category)
                                             {
-                                                Console.WriteLine($":{sub.Category} {groupColour}");
+                                                sb.AppendLine($":{sub.Category} {groupColour}");
                                             }
                                             if (sub.GroupTotal > 0)
                                             {
-                                                Console.WriteLine($"{sub.Category} [{sub.GroupTotal:#.00}] {group.Category} {groupColour}");
+                                                sb.AppendLine($"{sub.Category} [{sub.GroupTotal:#.00}] {group.Category} {groupColour}");
                                             }
                                             else
                                             {
-                                                Console.WriteLine($"Net [{-1 * sub.GroupTotal:#.00}] {sub.Category}");
+                                                sb.AppendLine($"Net [{-1 * sub.GroupTotal:#.00}] {sub.Category}");
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        Console.WriteLine($"Net [{-1 * group.GroupTotal:#.00}] {group.Category} {groupColour}");
+                                        sb.AppendLine($"Net [{-1 * group.GroupTotal:#.00}] {group.Category} {groupColour}");
                                         foreach (var sub in group.Sub)
                                         {
                                             if (sub.Category != group.Category)
                                             {
-                                                Console.WriteLine($":{sub.Category} {groupColour}");
+                                                sb.AppendLine($":{sub.Category} {groupColour}");
                                             }
                                             if (sub.GroupTotal > 0)
                                             {
-                                                Console.WriteLine($"{sub.Category} [{sub.GroupTotal:#.00}] WhereTo");
+                                                sb.AppendLine($"{sub.Category} [{sub.GroupTotal:#.00}] WhereTo");
                                             }
                                             else
                                             {
-                                                Console.WriteLine($"{group.Category} [{-1 * sub.GroupTotal:#.00}] {(sub.Category == group.Category ? $"{group.Category}: Unassigned" : sub.Category)} {groupColour}");
+                                                sb.AppendLine($"{group.Category} [{-1 * sub.GroupTotal:#.00}] {(sub.Category == group.Category ? $"{group.Category}: Unassigned" : sub.Category)} {groupColour}");
                                             }
                                         }
                                     }
@@ -164,9 +169,14 @@ namespace FinancialPlanSankey
                         }
 
                     }
+                    var output = sb.ToString();
+                    Console.Write(output);
+                    WindowsClipboard.SetText(output);
                 }
             }
             File.Delete(copiedFile);
+            var url = "https://sankeymatic.com/build/";
+            Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true }); // https://stackoverflow.com/a/43232486
         }
 
         public static (string BackgroundColour, string ForegoundColour) GetColourFromNumber(int n)
