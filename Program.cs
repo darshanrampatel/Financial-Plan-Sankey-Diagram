@@ -102,12 +102,29 @@ namespace FinancialPlanSankey
                                 break;
                             case "Transactions":
                                 var transactionsList = table.ToList<Transactions>();
+                                var charityTransactions = transactionsList
+                                    .Where(t => t.Category == "Charitable Donations")
+                                    .GroupBy(t => t.Date.Year)
+                                    .Select(g => new { Year = g.Key, Total = Math.Abs(g.Sum(t => t.Amount)) });
+                                var incomeTransactions = transactionsList
+                                    .Where(t => t.Category == "Wages & Salary" || (t.Category == "Taxes" && t.Subcategory == "Income Tax"))
+                                    .GroupBy(t => t.Date.Year)
+                                    .Select(g => new { Year = g.Key, Total = g.Sum(t => t.Amount) });
+                                var charityPercentages = incomeTransactions
+                                    .Select(i => new CharityPercentage { Year = i.Year, IncomeTotal = i.Total, CharityTotal = charityTransactions.FirstOrDefault(c => c.Year == i.Year)?.Total ?? 0 })
+                                    .ToList();
+                                Console.WriteLine($"--Charitable Donations By Year--");
+                                foreach (var year in charityPercentages)
+                                {
+                                    Console.WriteLine(year);
+                                }
+                                Console.WriteLine();
                                 var lockdownStart = new DateTime(2020, 3, 23);
                                 lockdownStart = new DateTime(2021, 1, 1); // set to 2021
                                 var lockdownEnd = new DateTime(2021, 12, 31);
                                 var lockdownTransactions = transactionsList
                                     .Where(t => t.Date >= lockdownStart && t.Date <= lockdownEnd)
-                                     // .Where(t => (t.Category == "Transfer" && !t.Subcategory.Contains("Credit Card")))                                    
+                                    // .Where(t => (t.Category == "Transfer" && !t.Subcategory.Contains("Credit Card")))                                    
                                     .Where(t => t.Category != "Transfer") //|| (t.Category == "Transfer" && !t.Subcategory.Contains("Credit Card")))
                                     .GroupBy(t => t.Category)
                                     .Select(g => new GroupedTransactions
@@ -170,7 +187,7 @@ namespace FinancialPlanSankey
 
                     }
                     var output = sb.ToString();
-                    Console.Write(output);
+                    // Console.Write(output);
                     WindowsClipboard.SetText(output);
                 }
             }
@@ -256,6 +273,15 @@ namespace FinancialPlanSankey
             public string Subcategory { get; set; }
             public string Memo { get; set; }
             public string Type { get; set; }
+        }
+
+        public class CharityPercentage
+        {
+            public int Year { get; set; }
+            public double IncomeTotal { get; set; }
+            public double CharityTotal { get; set; }
+            public double Percentage => (CharityTotal / IncomeTotal) * 100;
+            public override string ToString() => $"{Year}: £{CharityTotal,10:N2} / £{IncomeTotal,10:N2} = {Percentage,5:N2}%";
         }
     }
 
