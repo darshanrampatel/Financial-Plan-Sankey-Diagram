@@ -107,7 +107,10 @@ namespace FinancialPlanSankey
                                     .GroupBy(t => t.Date.Year)
                                     .Select(g => new { Year = g.Key, Total = Math.Abs(g.Sum(t => t.Amount)) });
                                 var incomeTransactions = transactionsList
-                                    .Where(t => t.Category == "Wages & Salary" || (t.Category == "Taxes" && t.Subcategory == "Income Tax"))
+                                    .Where(t => t.Category == "Wages & Salary" ||
+                                       (t.Category == "Taxes" && t.Subcategory == "Income Tax") ||
+                                       (t.Category == "Taxes" && t.Subcategory == "National Insurance")
+                                     )
                                     .GroupBy(t => t.Date.Year)
                                     .Select(g => new { Year = g.Key, Total = g.Sum(t => t.Amount) });
                                 var charityPercentages = incomeTransactions
