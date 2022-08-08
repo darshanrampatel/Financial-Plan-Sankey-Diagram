@@ -112,19 +112,25 @@ namespace FinancialPlanSankey
                                        (t.Category == "Taxes" && t.Subcategory == "National Insurance")
                                      )
                                     .GroupBy(t => t.Date.Year)
-                                    .Select(g => new { Year = g.Key, Total = g.Sum(t => t.Amount) });
+                                    .Select(g => new { Year = g.Key, Total = g.Sum(t => t.Amount) });                                                               
                                 var charityPercentages = incomeTransactions
-                                    .Select(i => new CharityPercentage { Year = i.Year, IncomeTotal = i.Total, CharityTotal = charityTransactions.FirstOrDefault(c => c.Year == i.Year)?.Total ?? 0 })
+                                     .Select(i => new CharityPercentage
+                                     {
+                                         Year = i.Year,
+                                         IncomeTotal = i.Total,
+                                         CharityTotal = charityTransactions.FirstOrDefault(c => c.Year == i.Year)?.Total ?? 0
+                                     })
                                     .ToList();
                                 Console.WriteLine($"--Charitable Donations By Year--");
                                 foreach (var year in charityPercentages)
                                 {
                                     Console.WriteLine(year);
                                 }
+                                Console.WriteLine($"*The current year's income is estimated");
                                 Console.WriteLine();
                                 var lockdownStart = new DateTime(2020, 3, 23);
-                                lockdownStart = new DateTime(2021, 1, 1); // set to 2021
-                                var lockdownEnd = new DateTime(2021, 12, 31);
+                                lockdownStart = new DateTime(2022, 1, 1); // set to 2022
+                                var lockdownEnd = new DateTime(2022, 12, 31);
                                 var lockdownTransactions = transactionsList
                                     .Where(t => t.Date >= lockdownStart && t.Date <= lockdownEnd)
                                     // .Where(t => (t.Category == "Transfer" && !t.Subcategory.Contains("Credit Card")))                                    
@@ -281,10 +287,13 @@ namespace FinancialPlanSankey
         public class CharityPercentage
         {
             public int Year { get; set; }
-            public double IncomeTotal { get; set; }
-            public double CharityTotal { get; set; }
-            public double Percentage => (CharityTotal / IncomeTotal) * 100;
-            public override string ToString() => $"{Year}: £{CharityTotal,10:N2} / £{IncomeTotal,10:N2} = {Percentage,5:N2}%";
+            public double IncomeTotal { private get; set; }
+            public double CharityTotal { get;  set; }
+            private double ActualOrEstimatedIncomeTotal => Year == DateTime.UtcNow.Year
+                                         ? (IncomeTotal / ((double)DateTime.UtcNow.DayOfYear / Helper.GetDaysInYear(DateTime.UtcNow.Year)))
+                                         : IncomeTotal;
+            public double Percentage => (CharityTotal / ActualOrEstimatedIncomeTotal) * 100;
+            public override string ToString() => $"{Year}: £{CharityTotal,10:N2} / £{ActualOrEstimatedIncomeTotal,10:N2}{(Year == DateTime.UtcNow.Year ? "*" : " ")} = {Percentage,5:N2}%";
         }
     }
 
@@ -352,5 +361,7 @@ namespace FinancialPlanSankey
                 return Enumerable.Empty<T>();
             }
         }
+
+        public static int GetDaysInYear(int year) => Enumerable.Range(1, 12).Sum(month => DateTime.DaysInMonth(year, month));
     }
 }
