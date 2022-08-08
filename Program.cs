@@ -121,12 +121,13 @@ namespace FinancialPlanSankey
                                          CharityTotal = charityTransactions.FirstOrDefault(c => c.Year == i.Year)?.Total ?? 0
                                      })
                                     .ToList();
-                                Console.WriteLine($"--Charitable Donations By Year--");
+                                Console.WriteLine($"     --Charitable Donations By Year--    ");
+                                Console.WriteLine($"Year: {"Charity",11} / {"Income",11}  = {"%",6}");
                                 foreach (var year in charityPercentages)
                                 {
                                     Console.WriteLine(year);
                                 }
-                                Console.WriteLine($"*The current year's income is estimated");
+                                Console.WriteLine($" *The current year's income is estimated");
                                 Console.WriteLine();
                                 var lockdownStart = new DateTime(2020, 3, 23);
                                 lockdownStart = new DateTime(2022, 1, 1); // set to 2022
