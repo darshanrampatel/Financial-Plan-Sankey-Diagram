@@ -112,7 +112,7 @@ namespace FinancialPlanSankey
                                        (t.Category == "Taxes" && t.Subcategory == "National Insurance")
                                      )
                                     .GroupBy(t => t.Date.Year)
-                                    .Select(g => new { Year = g.Key, Total = g.Sum(t => t.Amount) });                                                               
+                                    .Select(g => new { Year = g.Key, Total = g.Sum(t => t.Amount) });
                                 var charityPercentages = incomeTransactions
                                      .Select(i => new CharityPercentage
                                      {
@@ -216,6 +216,24 @@ namespace FinancialPlanSankey
         }
 
         /// <summary>
+        /// Gets a stable six-character hash from a string
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns>The six-character hash</returns>
+        private static string AnonymiseShortHash(string s)
+        {
+            if (string.IsNullOrEmpty(s))
+            {
+                return string.Empty;
+            }
+
+            using var sha = new System.Security.Cryptography.SHA256Managed();
+            byte[] textData = Encoding.UTF8.GetBytes(s);
+            byte[] hash = sha.ComputeHash(textData);
+            return BitConverter.ToString(hash).Replace("-", string.Empty)[..6].ToLowerInvariant();
+        }
+
+        /// <summary>
         /// The predefined list of colours
         /// </summary>
         private static readonly (string BackgroundColour, string ForegoundColour)[] Colours = {
@@ -289,7 +307,7 @@ namespace FinancialPlanSankey
         {
             public int Year { get; set; }
             public double IncomeTotal { private get; set; }
-            public double CharityTotal { get;  set; }
+            public double CharityTotal { get; set; }
             private double ActualOrEstimatedIncomeTotal => Year == DateTime.UtcNow.Year
                                          ? (IncomeTotal / ((double)DateTime.UtcNow.DayOfYear / Helper.GetDaysInYear(DateTime.UtcNow.Year)))
                                          : IncomeTotal;
