@@ -226,10 +226,8 @@ namespace FinancialPlanSankey
             {
                 return string.Empty;
             }
-
-            using var sha = new System.Security.Cryptography.SHA256Managed();
             byte[] textData = Encoding.UTF8.GetBytes(s);
-            byte[] hash = sha.ComputeHash(textData);
+            byte[] hash = System.Security.Cryptography.SHA256.HashData(textData);
             return BitConverter.ToString(hash).Replace("-", string.Empty)[..6].ToLowerInvariant();
         }
 
