@@ -198,6 +198,8 @@ namespace FinancialPlanSankey
                     }
                     var output = sb.ToString();
                     // Console.Write(output);
+                    // TODO Use the new settings format and save the output to a file
+                    // See https://github.com/nowthis/sankeymatic/commit/3fc76a64310e54fca60092682948946f8ff4d1a5
                     WindowsClipboard.SetText(output);
                 }
             }
