@@ -49,7 +49,7 @@ namespace FinancialPlanSankey
                         FilterRow = (rowReader) =>
                         {
                             int progress = (int)Math.Ceiling(rowReader.Depth / (decimal)rowReader.RowCount * 100); // progress is in the range 0..100
-                            Console.WriteLine($"Reading {rowReader.Name} {progress}%");
+                            Console.Write($"\rReading {rowReader.Name} {progress}%");
                             return true;
                         },
 
