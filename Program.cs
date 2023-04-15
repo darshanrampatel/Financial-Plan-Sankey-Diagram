@@ -196,11 +196,59 @@ namespace FinancialPlanSankey
                         }
 
                     }
-                    var output = sb.ToString();
-                    // Console.Write(output);
-                    // TODO Use the new settings format and save the output to a file
-                    // See https://github.com/nowthis/sankeymatic/commit/3fc76a64310e54fca60092682948946f8ff4d1a5
-                    WindowsClipboard.SetText(output);
+
+                    var settingsFileContents = $@"
+// === Nodes and Flows ===
+
+{sb}
+
+// === Settings ===
+
+size w 2560
+  h 2560
+margin l 12
+  r 12
+  t 18
+  b 20
+bg color #ffffff
+  transparent N
+node w 9
+  h 50
+  spacing 85
+  border 0
+  theme a
+  color #888888
+  opacity 1
+flow curvature 0.5
+  inheritfrom outside-in
+  color #999999
+  opacity 0.45
+layout order automatic
+  justifyorigins N
+  justifyends N
+  reversegraph N
+  attachincompletesto nearest
+labels color #000000
+  highlight 0.55
+  fontface sans-serif
+labelname appears Y
+  size 16
+  weight 400
+labelvalue appears Y
+  fullprecision Y
+labelposition first before
+  breakpoint 6
+value format ',.'
+  prefix '£'
+  suffix ''
+themeoffset a 9
+  b 0
+  c 0
+  d 0
+meta mentionsankeymatic N
+  listimbalances Y
+";                           
+                    WindowsClipboard.SetText(settingsFileContents);
                 }
             }
             File.Delete(copiedFile);
