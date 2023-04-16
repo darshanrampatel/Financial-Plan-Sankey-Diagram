@@ -177,7 +177,7 @@ namespace FinancialPlanSankey
                                             }
                                             if (sub.GroupTotal > 0)
                                             {
-                                                sb.AppendLine($"{sub.Category} [{sub.GroupTotal:#.00}] WhereTo");
+                                                sb.AppendLine($"{sub.Category} [{sub.GroupTotal:#.00}] Net");
                                             }
                                             else
                                             {
