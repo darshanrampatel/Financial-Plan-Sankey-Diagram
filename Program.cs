@@ -353,14 +353,59 @@ meta mentionsankeymatic N
 
         public class Transactions
         {
-            public DateTime Date { get; set; }
-            public string Account { get; set; }
-            public string Payee { get; set; }
-            public double Amount { get; set; }
-            public string Category { get; set; }
-            public string Subcategory { get; set; }
-            public string Memo { get; set; }
-            public string Type { get; set; }
+            public DateTime Date { get; set; } // Column B
+            public string Account { get; set; } // Column C
+            public string Payee { get; set; } // Column D
+            public double Amount { get; set; } // Column F
+            public string Category { get; set; } // Column G
+            public string Subcategory { get; set; } // Column H
+            public string Memo { get; set; } // Column I
+
+            /// <summary>
+            /// Based on this (gnarly) Excel formula:<br/>
+            /// <code>
+            /// =IF(ISNUMBER(SEARCH("ISA",$C2)),"ISA",IF(ISNUMBER(SEARCH("Bond",$C2)),"Bond",IF(ISNUMBER(SEARCH([InvestmentProvider],$C2)),IF($G2="Buy Investment","Buy Investment","Investment"),IF(ISNUMBER(SEARCH("Pension",$C2)),IF(ISNUMBER(SEARCH([PensionProvider],$C2)),[PensionProvider],IF($G2="Buy Investment","Pension","Pension")),IF(ISNUMBER(SEARCH("eSaver",$C2)),"eSaver",IF(ISNUMBER(SEARCH("Loan principal received",$I2)),IF(ISNUMBER(SEARCH([OriginalLoanPrincipalAccount],$C2)),"Cash","House"),IF(AND(ISNUMBER(SEARCH("Difference to move.",$I2)),ISNUMBER(SEARCH([DifferenceAddress],$C2))),"Difference","Cash")))))))
+            /// </code>
+            /// </summary>
+            public string Type // Column K
+            {
+                get
+                {
+                    if (string.IsNullOrWhiteSpace(Account))
+                    {
+                        return "Cash";
+                    }
+                    if (Account.Contains("ISA", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        return "ISA";
+                    }
+                    else if (Account.Contains("Bond", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        return "Bond";
+                    }
+                    else if (Account.Contains(config.InvestmentProvider, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        return Category == "Buy Investment" ? "Buy Investment" : "Investment";
+                    }
+                    else if (Account.Contains("Pension", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        return Account.Contains(config.PensionProvider, StringComparison.InvariantCultureIgnoreCase) ? config.PensionProvider : "Pension";
+                    }
+                    else if (Account.Contains("eSaver", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        return "eSaver";
+                    }
+                    else if (Memo?.Contains("Loan principal received", StringComparison.InvariantCultureIgnoreCase) == true)
+                    {
+                        return Account.Contains(config.OriginalLoanPrincipalAccount, StringComparison.InvariantCultureIgnoreCase) ? "Cash" : "House";
+                    }
+                    else if (Memo?.Contains("Difference to move.", StringComparison.InvariantCultureIgnoreCase) == true && Account.Contains(config.DifferenceAddress, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        return "Difference";
+                    }
+                    return "Cash";
+                }
+            }          
         }
 
         public class CharityPercentage
