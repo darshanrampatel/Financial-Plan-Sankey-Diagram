@@ -1,4 +1,5 @@
 ﻿using ExcelDataReader;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,10 +11,21 @@ using System.Text;
 
 namespace FinancialPlanSankey
 {
+    class Config
+    {
+        public string OriginalLoanPrincipalAccount { get; set; }
+        public string InvestmentProvider { get; set; }
+        public string PensionProvider { get; set; }
+        public string DifferenceAddress { get; set; }
+    }
+
     class Program
     {
+        static Config config;
         static void Main()
         {
+            config = new ConfigurationBuilder().AddUserSecrets<Config>().Build().GetSection(nameof(Config)).Get<Config>();
+
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
             var excelFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Dropbox", "Finances", "Financial Plan.xlsm");
