@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace FinancialPlanSankey
 {
@@ -19,7 +20,7 @@ namespace FinancialPlanSankey
         public string DifferenceAddress { get; set; }
     }
 
-    class Program
+    partial class Program
     {
         static Config config;
         static void Main()
@@ -293,6 +294,12 @@ meta mentionsankeymatic N
             return BitConverter.ToString(hash).Replace("-", string.Empty)[..6].ToLowerInvariant();
         }
 
+        [GeneratedRegex("[\\d-]")]
+        private static partial Regex ReplaceDigitsRegex();
+        private static string ReplaceDigits(string s) => ReplaceDigitsRegex().Replace(s, "?");
+        private static string AnonymiseAmount(double amount) => ReplaceDigits($"{amount,10:N2}");
+        private static string AnonymisePercentage(double percentage) => ReplaceDigits($"{percentage,5:N2}");
+
         /// <summary>
         /// The predefined list of colours
         /// </summary>
@@ -418,6 +425,7 @@ meta mentionsankeymatic N
                                          : IncomeTotal;
             public double Percentage => (CharityTotal / ActualOrEstimatedIncomeTotal) * 100;
             public override string ToString() => $"{Year}: £{CharityTotal,10:N2} / £{ActualOrEstimatedIncomeTotal,10:N2}{(Year == DateTime.UtcNow.Year ? "*" : " ")} = {Percentage,5:N2}%";
+            public string AnonymisedString => $"{Year}: £{AnonymiseAmount(CharityTotal)} / £{AnonymiseAmount(ActualOrEstimatedIncomeTotal)}{(Year == DateTime.UtcNow.Year ? "*" : " ")} = {AnonymisePercentage(Percentage)}%";
         }
     }
 
