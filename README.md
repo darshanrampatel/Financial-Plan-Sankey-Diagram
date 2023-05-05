@@ -2,4 +2,4 @@
 
 To be used with [SankeyMATIC](http://sankeymatic.com/build/)
 
-![sankeymatic_20221027_234703_2560x2560](https://user-images.githubusercontent.com/14162899/198412096-35e2180b-9860-444f-bdad-98a980c66f90.png)
+![sankeymatic_20230505_221229_2560x2560](https://user-images.githubusercontent.com/14162899/236569675-155220a8-36fc-4375-9de1-d85bf93e0693.png)
