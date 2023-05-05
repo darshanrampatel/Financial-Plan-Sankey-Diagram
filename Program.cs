@@ -25,6 +25,22 @@ namespace FinancialPlanSankey
         static Config config;
         static void Main()
         {
+            var anonymise = false;
+            ConsoleKey response;
+            do
+            {
+                // https://stackoverflow.com/questions/2642585/read-a-variable-in-bash-with-a-default-value
+                Console.WriteLine("Anonymise? (y/n) [Default = n]");
+                response = Console.ReadKey(true).Key; // Don't show
+                if (response == ConsoleKey.Enter)
+                {
+                    anonymise = false;
+                    break;
+                }
+                anonymise = response == ConsoleKey.Y;
+
+            } while (response != ConsoleKey.Y && response != ConsoleKey.N);
+
             config = new ConfigurationBuilder().AddUserSecrets<Config>().Build().GetSection(nameof(Config)).Get<Config>();
 
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
@@ -138,7 +154,7 @@ namespace FinancialPlanSankey
                                 Console.WriteLine($"Year: {"Charity",11} / {"Income",11}  = {"%",6}");
                                 foreach (var year in charityPercentages)
                                 {
-                                    Console.WriteLine(year);
+                                    Console.WriteLine(anonymise ? year.AnonymisedString : year);
                                 }
                                 Console.WriteLine($" *The current year's income is estimated");
                                 Console.WriteLine();
@@ -159,42 +175,45 @@ namespace FinancialPlanSankey
                                 foreach (var group in lockdownTransactions)
                                 {
                                     var groupColour = GetColourFromNumber(transactionIndex).BackgroundColour;
-                                    sb.AppendLine($":{group.Category} {groupColour}");
+                                    var groupCategory = anonymise ? AnonymiseShortHash(group.Category) : group.Category;                                    
+                                    sb.AppendLine($":{groupCategory} {groupColour}");
                                     if (group.GroupTotal > 0)
                                     {
-                                        sb.AppendLine($"{group.Category} [{group.GroupTotal:#.00}] Net {groupColour}");
+                                        sb.AppendLine($"{groupCategory} [{group.GroupTotal:#.00}] Net {groupColour}");
                                         foreach (var sub in group.Sub)
                                         {
-                                            if (sub.Category != group.Category)
+                                            var subCategory = anonymise ? AnonymiseShortHash(sub.Category) : sub.Category;
+                                            if (subCategory != groupCategory)
                                             {
-                                                sb.AppendLine($":{sub.Category} {groupColour}");
+                                                sb.AppendLine($":{subCategory} {groupColour}");
                                             }
                                             if (sub.GroupTotal > 0)
                                             {
-                                                sb.AppendLine($"{sub.Category} [{sub.GroupTotal:#.00}] {group.Category} {groupColour}");
+                                                sb.AppendLine($"{subCategory} [{sub.GroupTotal:#.00}] {groupCategory} {groupColour}");
                                             }
                                             else
                                             {
-                                                sb.AppendLine($"Net [{-1 * sub.GroupTotal:#.00}] {sub.Category}");
+                                                sb.AppendLine($"Net [{-1 * sub.GroupTotal:#.00}] {subCategory}");
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        sb.AppendLine($"Net [{-1 * group.GroupTotal:#.00}] {group.Category} {groupColour}");
+                                        sb.AppendLine($"Net [{-1 * group.GroupTotal:#.00}] {groupCategory} {groupColour}");
                                         foreach (var sub in group.Sub)
                                         {
-                                            if (sub.Category != group.Category)
+                                            var subCategory = anonymise ? AnonymiseShortHash(sub.Category) : sub.Category;
+                                            if (subCategory != groupCategory)
                                             {
-                                                sb.AppendLine($":{sub.Category} {groupColour}");
+                                                sb.AppendLine($":{subCategory} {groupColour}");
                                             }
                                             if (sub.GroupTotal > 0)
                                             {
-                                                sb.AppendLine($"{sub.Category} [{sub.GroupTotal:#.00}] Net");
+                                                sb.AppendLine($"{subCategory} [{sub.GroupTotal:#.00}] Net");
                                             }
                                             else
                                             {
-                                                sb.AppendLine($"{group.Category} [{-1 * sub.GroupTotal:#.00}] {(sub.Category == group.Category ? $"{group.Category}: Unassigned" : sub.Category)} {groupColour}");
+                                                sb.AppendLine($"{groupCategory} [{-1 * sub.GroupTotal:#.00}] {(subCategory == groupCategory ? $"{groupCategory}: Unassigned" : subCategory)} {groupColour}");
                                             }
                                         }
                                     }
@@ -247,7 +266,7 @@ labels color #000000
 labelname appears Y
   size 16
   weight 400
-labelvalue appears Y
+labelvalue appears {(anonymise ? "N" : "Y")}
   fullprecision Y
 labelposition first before
   breakpoint 6
