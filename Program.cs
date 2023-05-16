@@ -153,7 +153,7 @@ namespace FinancialPlanSankey
                                 Console.WriteLine($"     --Charitable Donations By Year--    ");
                                 Console.WriteLine($"Year: {"Charity",11} / {"Income",11}  = {"%",6}");
                                 foreach (var year in charityPercentages)
-                                {                                    
+                                {
                                     Console.WriteLine(anonymise ? year.AnonymisedString : year);
                                 }
                                 Console.WriteLine($" *The current year's income is estimated");
@@ -175,7 +175,7 @@ namespace FinancialPlanSankey
                                 foreach (var group in lockdownTransactions)
                                 {
                                     var groupColour = GetColourFromNumber(transactionIndex).BackgroundColour;
-                                    var groupCategory = anonymise ? AnonymiseShortHash(group.Category) : group.Category;                                    
+                                    var groupCategory = anonymise ? AnonymiseShortHash(group.Category) : group.Category;
                                     sb.AppendLine($":{groupCategory} {groupColour}");
                                     if (group.GroupTotal > 0)
                                     {
