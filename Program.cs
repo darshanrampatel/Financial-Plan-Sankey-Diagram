@@ -153,7 +153,7 @@ namespace FinancialPlanSankey
                                 Console.WriteLine($"     --Charitable Donations By Year--    ");
                                 Console.WriteLine($"Year: {"Charity",11} / {"Income",11}  = {"%",6}");
                                 foreach (var year in charityPercentages)
-                                {
+                                {                                    
                                     Console.WriteLine(anonymise ? year.AnonymisedString : year);
                                 }
                                 Console.WriteLine($" *The current year's income is estimated");
@@ -164,7 +164,7 @@ namespace FinancialPlanSankey
                                 var lockdownTransactions = transactionsList
                                     .Where(t => t.Date >= lockdownStart && t.Date <= lockdownEnd)
                                     // .Where(t => (t.Category == "Transfer" && !t.Subcategory.Contains("Credit Card")))                                    
-                                    .Where(t => t.Category != "Transfer") //|| (t.Category == "Transfer" && !t.Subcategory.Contains("Credit Card")))
+                                    .Where(t => t.Category != "Transfer") //|| (t.Category == "Transfer" && !t.Subcategory.Contains("Credit Card")))                                    
                                     .GroupBy(t => t.Category)
                                     .Select(g => new GroupedTransactions
                                     {
@@ -279,7 +279,7 @@ themeoffset a 9
   d 0
 meta mentionsankeymatic N
   listimbalances Y
-";                           
+";
                     WindowsClipboard.SetText(settingsFileContents);
                 }
             }
@@ -390,7 +390,7 @@ meta mentionsankeymatic N
             /// <summary>
             /// Based on this (gnarly) Excel formula:<br/>
             /// <code>
-            /// =IF(ISNUMBER(SEARCH("ISA",$C2)),"ISA",IF(ISNUMBER(SEARCH("Bond",$C2)),"Bond",IF(ISNUMBER(SEARCH([InvestmentProvider],$C2)),IF($G2="Buy Investment","Buy Investment","Investment"),IF(ISNUMBER(SEARCH("Pension",$C2)),IF(ISNUMBER(SEARCH([PensionProvider],$C2)),[PensionProvider],IF($G2="Buy Investment","Pension","Pension")),IF(ISNUMBER(SEARCH("eSaver",$C2)),"eSaver",IF(ISNUMBER(SEARCH("Loan principal received",$I2)),IF(ISNUMBER(SEARCH([OriginalLoanPrincipalAccount],$C2)),"Cash","House"),IF(AND(ISNUMBER(SEARCH("Difference to move.",$I2)),ISNUMBER(SEARCH([DifferenceAddress],$C2))),"Difference","Cash")))))))
+            /// =IF(ISNUMBER(SEARCH("ISA",$C2)),"ISA",IF(ISNUMBER(SEARCH("Bond",$C2)),"Bond",IF(ISNUMBER(SEARCH([InvestmentProvider],$C2)),IF($G2="Buy Investment","Buy Investment","Investment"),IF(ISNUMBER(SEARCH("Pension",$C2)),IF(ISNUMBER(SEARCH([PensionProvider],$C2)),[PensionProvider],IF($G2="Buy Investment","Pension","Pension")),IF(ISNUMBER(SEARCH("Saver",$C2)),"Saver",IF(ISNUMBER(SEARCH("Loan principal received",$I2)),IF(ISNUMBER(SEARCH([OriginalLoanPrincipalAccount],$C2)),"Cash","House"),IF(AND(ISNUMBER(SEARCH("Difference to move.",$I2)),ISNUMBER(SEARCH([DifferenceAddress],$C2))),"Difference","Cash")))))))
             /// </code>
             /// </summary>
             public string Type // Column K
@@ -417,9 +417,9 @@ meta mentionsankeymatic N
                     {
                         return Account.Contains(config.PensionProvider, StringComparison.InvariantCultureIgnoreCase) ? config.PensionProvider : "Pension";
                     }
-                    else if (Account.Contains("eSaver", StringComparison.InvariantCultureIgnoreCase))
+                    else if (Account.Contains("Saver", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        return "eSaver";
+                        return "Saver";
                     }
                     else if (Memo?.Contains("Loan principal received", StringComparison.InvariantCultureIgnoreCase) == true)
                     {
@@ -431,7 +431,7 @@ meta mentionsankeymatic N
                     }
                     return "Cash";
                 }
-            }          
+            }
         }
 
         public class CharityPercentage
