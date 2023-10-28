@@ -159,8 +159,8 @@ namespace FinancialPlanSankey
                                 Console.WriteLine($" *The current year's income is estimated");
                                 Console.WriteLine();
                                 var lockdownStart = new DateTime(2020, 3, 23);
-                                lockdownStart = new DateTime(2022, 1, 1); // set to 2022
-                                var lockdownEnd = new DateTime(2022, 12, 31);
+                                lockdownStart = new DateTime(2023, 1, 1); // set to 2023
+                                var lockdownEnd = new DateTime(2023, 12, 31);
                                 var lockdownTransactions = transactionsList
                                     .Where(t => t.Date >= lockdownStart && t.Date <= lockdownEnd)
                                     // .Where(t => (t.Category == "Transfer" && !t.Subcategory.Contains("Credit Card")))                                    
