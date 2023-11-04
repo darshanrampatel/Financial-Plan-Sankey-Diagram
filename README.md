@@ -2,4 +2,4 @@
 
 To be used with [SankeyMATIC](http://sankeymatic.com/build/)
 
-![sankeymatic_20230505_221229_2560x2560](https://user-images.githubusercontent.com/14162899/236569675-155220a8-36fc-4375-9de1-d85bf93e0693.png)
+![sankeymatic_20231104_221329_2560x2560](https://github.com/darshanrampatel/Financial-Plan-Sankey-Diagram/assets/14162899/9e6c67ef-8131-4681-be13-af3e425782f9)
