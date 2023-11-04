@@ -172,7 +172,7 @@ namespace FinancialPlanSankey
                                         Transactions = g.ToList(),
                                     });
                                 var transactionIndex = 0;
-                                foreach (var group in lockdownTransactions)
+                                foreach (var group in lockdownTransactions.OrderBy(g => g.GroupTotal)) // Order expenses by largest first
                                 {
                                     var groupColour = GetColourFromNumber(transactionIndex).BackgroundColour;
                                     var groupCategory = anonymise ? AnonymiseShortHash(group.Category) : group.Category;
@@ -180,7 +180,7 @@ namespace FinancialPlanSankey
                                     if (group.GroupTotal > 0)
                                     {
                                         sb.AppendLine($"{groupCategory} [{group.GroupTotal:#.00}] Net {groupColour}");
-                                        foreach (var sub in group.Sub)
+                                        foreach (var sub in group.Sub.OrderByDescending(s => s.GroupTotal)) // Order income by largest first
                                         {
                                             var subCategory = anonymise ? AnonymiseShortHash(sub.Category) : sub.Category;
                                             if (subCategory != groupCategory)
@@ -200,7 +200,7 @@ namespace FinancialPlanSankey
                                     else
                                     {
                                         sb.AppendLine($"Net [{-1 * group.GroupTotal:#.00}] {groupCategory} {groupColour}");
-                                        foreach (var sub in group.Sub)
+                                        foreach (var sub in group.Sub.OrderBy(s => s.GroupTotal)) // Order expenses by largest first
                                         {
                                             var subCategory = anonymise ? AnonymiseShortHash(sub.Category) : sub.Category;
                                             if (subCategory != groupCategory)
