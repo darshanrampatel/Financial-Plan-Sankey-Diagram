@@ -41,6 +41,21 @@ namespace FinancialPlanSankey
 
             } while (response != ConsoleKey.Y && response != ConsoleKey.N);
 
+            var monthlyAverage = false;
+            do
+            {
+                // https://stackoverflow.com/questions/2642585/read-a-variable-in-bash-with-a-default-value
+                Console.WriteLine("Monthly Average? (y/n) [Default = n]");
+                response = Console.ReadKey(true).Key; // Don't show
+                if (response == ConsoleKey.Enter)
+                {
+                    monthlyAverage = false;
+                    break;
+                }
+                monthlyAverage = response == ConsoleKey.Y;
+
+            } while (response != ConsoleKey.Y && response != ConsoleKey.N);
+
             config = new ConfigurationBuilder().AddUserSecrets<Config>().Build().GetSection(nameof(Config)).Get<Config>();
 
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
@@ -158,21 +173,23 @@ namespace FinancialPlanSankey
                                 }
                                 Console.WriteLine($" *The current year's income is estimated");
                                 Console.WriteLine();
-                                var lockdownStart = new DateTime(2020, 3, 23);
-                                lockdownStart = new DateTime(2023, 1, 1); // set to 2023
-                                var lockdownEnd = new DateTime(2023, 12, 31);
-                                var lockdownTransactions = transactionsList
-                                    .Where(t => t.Date >= lockdownStart && t.Date <= lockdownEnd)
+                                var startDate = new DateTime(DateTime.Today.Year, 1, 1);
+                                var endDate = DateTime.Today;
+                                var proportionOfYear = endDate.DayOfYear / (double)(DateTime.IsLeapYear(endDate.Year) ? 366 : 365);
+                                var monthFactor = monthlyAverage ? 12 * proportionOfYear : 1;
+                                var transactions = transactionsList
+                                    .Where(t => t.Date >= startDate && t.Date <= endDate)
                                     // .Where(t => (t.Category == "Transfer" && !t.Subcategory.Contains("Credit Card")))                                    
                                     .Where(t => t.Category != "Transfer") //|| (t.Category == "Transfer" && !t.Subcategory.Contains("Credit Card")))                                    
                                     .GroupBy(t => t.Category)
                                     .Select(g => new GroupedTransactions
                                     {
                                         Category = g.Key,//g.Key == "Transfer" ? "Net" : g.Key,
+                                        MonthFactor = monthFactor,
                                         Transactions = g.ToList(),
                                     });
                                 var transactionIndex = 0;
-                                foreach (var group in lockdownTransactions.OrderBy(g => g.GroupTotal)) // Order expenses by largest first
+                                foreach (var group in transactions.OrderBy(g => g.GroupTotal)) // Order expenses by largest first
                                 {
                                     var groupColour = GetColourFromNumber(transactionIndex).BackgroundColour;
                                     var groupCategory = anonymise ? AnonymiseShortHash(group.Category) : group.Category;
@@ -373,8 +390,9 @@ meta mentionsankeymatic N
         {
             public string Category { get; set; }
             public List<Transactions> Transactions { get; set; }
-            public double GroupTotal => Transactions?.Sum(s => s.Amount) ?? 0;
-            public List<GroupedTransactions> Sub => Transactions?.GroupBy(t => string.IsNullOrWhiteSpace(t.Subcategory) ? $"{Category}: Unassigned" : $"{Category}: {t.Subcategory}").Select(g => new GroupedTransactions { Category = g.Key, Transactions = g.ToList() }).ToList();
+            public double MonthFactor { get; init; }
+            public double GroupTotal => (Transactions?.Sum(s => s.Amount) ?? 0) / MonthFactor;
+            public List<GroupedTransactions> Sub => Transactions?.GroupBy(t => string.IsNullOrWhiteSpace(t.Subcategory) ? $"{Category}: Unassigned" : $"{Category}: {t.Subcategory}").Select(g => new GroupedTransactions { Category = g.Key, Transactions = g.ToList(), MonthFactor = MonthFactor }).ToList();
         }
 
         public class Transactions
