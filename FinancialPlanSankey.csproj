@@ -5,7 +5,17 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<UserSecretsId>a65b2eb5-74c8-4b45-9ce4-28290ae4f5c2</UserSecretsId>
+		<ApplicationIcon>icons8-british-pound-96.ico</ApplicationIcon>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<SelfContained>true</SelfContained>
+		<PublishSingleFile Condition="'$(Configuration)' == 'Release'">true</PublishSingleFile>
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="ExcelDataReader" Version="3.6.0" />

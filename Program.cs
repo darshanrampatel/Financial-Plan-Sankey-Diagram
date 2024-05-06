@@ -243,7 +243,7 @@ namespace FinancialPlanSankey
                                 Console.WriteLine($"Unknown sheet {table.TableName}");
                                 break;
                         }
-
+                        Console.ReadLine();
                     }
 
                     var settingsFileContents = $@"
