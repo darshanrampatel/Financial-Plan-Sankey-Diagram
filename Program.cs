@@ -243,7 +243,6 @@ namespace FinancialPlanSankey
                                 Console.WriteLine($"Unknown sheet {table.TableName}");
                                 break;
                         }
-                        Console.ReadLine();
                     }
 
                     var settingsFileContents = $@"
@@ -303,6 +302,7 @@ meta mentionsankeymatic N
             File.Delete(copiedFile);
             var url = "https://sankeymatic.com/build/";
             Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true }); // https://stackoverflow.com/a/43232486
+            Console.ReadLine();
         }
 
         public static (string BackgroundColour, string ForegoundColour) GetColourFromNumber(int n)
